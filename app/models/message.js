@@ -30,7 +30,7 @@ var validatePresenceOf = function (value) {
   return value && value.length;
 }
 
-MessageSchema.path('author').validate(function (name) {
+MessageSchema.path('author').validate(function (author) {
   return author.length;
 }, 'Author cannot be blank');
 

@@ -45,17 +45,7 @@ CustomerSchema.path('deviceId').validate(function (deviceId) {
 
 CustomerSchema.methods = {
 
-  // /**
-  // * Create Customer given deviceId & Company
-  // */
-  createWithDeviceId: function(deviceId, companyId, next) {
-    this.create({deviceId : deviceId, company: companyId}, function(err, customer) {
-      if(err) {
-        console.log(err);
-      }
-      next(customer);
-    });
-  }
+// No METHODS YET
 
 }
 
@@ -74,6 +64,21 @@ CustomerSchema.statics = {
       .populate('company', 'key') //TODO: specify only company metadata you want
       .exec(cb);
   }
+
+  /**
+  * Create Customer given deviceId & Company
+  *
+   * @param {deviceId} deviceId
+   * @param {companyId} companyId
+  */
+  // createWithDeviceId: function(deviceId, companyId, next) {
+  //   this.create({deviceId : deviceId, company: companyId}, function(err, customer) {
+  //     if(err) {
+  //       console.log(err);
+  //     }
+  //     next(customer);
+  //   });
+  // }
 
 }
 

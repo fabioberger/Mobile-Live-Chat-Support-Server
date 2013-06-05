@@ -25,8 +25,9 @@ var web_socket_primary_key = -1;
 chat.init(1, 1, function(err, conversation) {
   if(err) {
     // TODO: Send Error via web_socket to client & return [incorrect company publicKey]
-    console.log(err);
+    return console.log(err);
   }
+  console.log(conversation);
 });
 
 
