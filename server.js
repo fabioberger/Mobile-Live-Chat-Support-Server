@@ -13,7 +13,7 @@ mongoose.connect('mongodb://localhost/test');
 var models_path = __dirname + '/app/models';
 fs.readdirSync(models_path).forEach(function (file) {
   require(models_path+'/'+file);
-});
+}); 
 
 var chat = require('./app/controllers/chat');
 
@@ -21,35 +21,48 @@ var web_socket_server      = new WebSocketServer({port: 5000, disableHixie: true
 var web_sockets            = {};
 var web_socket_primary_key = -1;
 
-//Initialize chat connection
-chat.init(1, 1, function(err, conversation) {
-  if(err) {
-    // TODO: Send Error via web_socket to client & return [incorrect company publicKey]
-    return console.log(err);
-  }
-  console.log(conversation);
-});
-
-
-// if(chat_obj.stat == "error") { web_socket.send(JSON.stringify(chat_obj)); } //Send error msg to client. Return?!?
-// TODO: else extract assigned agent & init agent connection & piping of msgs
-// Send over any exisiting conversation messages or greeting message
-
-
 web_socket_server.on('connection', function(web_socket) {
 
   // Add newly created web_socket to web_sockets.
   var web_socket_id = ++web_socket_primary_key;
   web_sockets[web_socket_id] = web_socket;
 
+  var redisKey = "";
+
   web_socket.on('message', function(message) {
-    // console.log("message: " + message);
 
-    var msg_obj = JSON.parse(message); // TODO: Rescue and return error.
-    switch (msg_obj.messageType) {
+    console.log("Request received: "+message);
 
-      case "connect": // eg. { "messageType": "connect", "companyKey": 1, "customerId": 1 }
-        chat.init(msg_obj.companyKey, msg_obj.customerId);
+    // Move into JSONHelper
+    var JSONH = require('./app/helpers/JSONHelper');
+    var msg = JSONH.parseJSON(message);
+    switch (msg.messageType) {
+      // Error Case
+      case 0:
+        return web_socket.send(JSON.stringify(msg));
+      break;
+
+      // Connect Case
+      case 1: // eg. { "messageType": 1, "companyKey": 1, "deviceId": 1 }
+        //Initialize chat connection
+        // Move code block into web_socket callbacks & uncomment web_socket calls
+        // ar msg = { "type": "connect", "companyKey": 1, "deviceId": 1 };
+        chat.init(msg.companyKey, msg.deviceId, function(err, conversation) {
+          if(err) {
+            // TODO: Send Error via web_socket to client & return [incorrect company publicKey]
+            console.log(err);
+            return web_socket.send(JSON.stringify({messageType: 0, error: err.message}));
+          }
+          var init_response = chat.createInitResponse(conversation);
+          redisKey = conversation.redisKey;
+          console.log(init_response);
+          web_socket.send(JSON.stringify(init_response));
+        });
+      break;
+
+      // Incoming Message
+      case 2: 
+        // Insert into Redis
       break;
 
       // Add cases here!

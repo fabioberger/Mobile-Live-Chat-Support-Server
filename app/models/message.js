@@ -12,7 +12,7 @@ var _ = require('underscore');
 
 var MessageSchema = new Schema({
   author: String,
-  timestamp: Date,
+  timestamp: String,
   content: String
 });
 

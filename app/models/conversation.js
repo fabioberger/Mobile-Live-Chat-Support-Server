@@ -58,8 +58,9 @@ ConversationSchema.statics = {
 
   load: function (customerId, companyId, cb) {
     this.findOne({ customer : customerId, company : companyId })
-      .populate('agent') //TODO: specify only agent metadata you want
-      .populate('messages') //TODO: specify only messages metadata you want
+      .populate('company', { name : 1, _id : 0 })
+      .populate('agent', { name : 1, _id : 0}) //TODO: specify only agent metadata you want
+      .populate('messages', { author : 1, timestamp : 1, content : 1, _id : 0}) //TODO: specify only messages metadata you want
       .exec(cb);
   }
 
