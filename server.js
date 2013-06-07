@@ -2,76 +2,150 @@
 * Module Dependencies
 */
 
-var WebSocketServer = require('ws').Server;
+// Third Party Modules
+var WebSocketLib = require('ws');
+var WebSocketServer = WebSocketLib.Server;
 var mongoose = require('mongoose');
+var redis = require('redis');
 var fs = require('fs');
+
+// In-house Modules
+var chat = require('chatConnect');
+
+// Helpers
+var JSONH = require('./app/helpers/JSONHelper');
 
 // Bootstrap db connection
 mongoose.connect('mongodb://localhost/test');
 
 // Bootstrap models
-var models_path = __dirname + '/app/models';
-fs.readdirSync(models_path).forEach(function (file) {
-  require(models_path+'/'+file);
+var modelsPath = __dirname + '/app/models';
+fs.readdirSync(modelsPath).forEach(function (file) {
+  require(modelsPath+'/'+file);
 }); 
 
-var chat = require('./app/controllers/chat');
+// uncomment to pre-populate with test company and agent
+// require('./config/populate').populateDB();
 
-var web_socket_server      = new WebSocketServer({port: 5000, disableHixie: true});
-var web_sockets            = {};
-var web_socket_primary_key = -1;
+var webSocketServer      = new WebSocketServer({port: 5000, disableHixie: true});
+var webSockets            = {};
+var webSocketPrimaryKey = -1;
 
-web_socket_server.on('connection', function(web_socket) {
+// Create Redis Client
+var redisClient = redis.createClient();
 
-  // Add newly created web_socket to web_sockets.
-  var web_socket_id = ++web_socket_primary_key;
-  web_sockets[web_socket_id] = web_socket;
+webSocketServer.on('connection', function(webSocket) {
 
-  var redisKey = "";
+  // Add newly created webSocket to webSockets.
+  var webSocketId = ++webSocketPrimaryKey;
+  webSockets[webSocketId] = webSocket;
 
-  web_socket.on('message', function(message) {
+  //var redisClient = redis.createClient();
+  var redisKey = null;
 
-    console.log("Request received: "+message);
+  //connect Redis Agent
+  var agent2 = redis.createClient();
 
-    // Move into JSONHelper
-    var JSONH = require('./app/helpers/JSONHelper');
-    var msg = JSONH.parseJSON(message);
-    switch (msg.messageType) {
-      // Error Case
-      case 0:
-        return web_socket.send(JSON.stringify(msg));
-      break;
-
-      // Connect Case
-      case 1: // eg. { "messageType": 1, "companyKey": 1, "deviceId": 1 }
-        //Initialize chat connection
-        // Move code block into web_socket callbacks & uncomment web_socket calls
-        // ar msg = { "type": "connect", "companyKey": 1, "deviceId": 1 };
-        chat.init(msg.companyKey, msg.deviceId, function(err, conversation) {
-          if(err) {
-            // TODO: Send Error via web_socket to client & return [incorrect company publicKey]
-            console.log(err);
-            return web_socket.send(JSON.stringify({messageType: 0, error: err.message}));
-          }
-          var init_response = chat.createInitResponse(conversation);
-          redisKey = conversation.redisKey;
-          console.log(init_response);
-          web_socket.send(JSON.stringify(init_response));
-        });
-      break;
-
-      // Incoming Message
-      case 2: 
-        // Insert into Redis
-      break;
-
-      // Add cases here!
-    }
-
+  // Most clients probably don't do much on "subscribe".
+  agent2.on("subscribe", function (channel, count) {
+      // no output
   });
 
-  web_socket.on('close', function() {
-    delete web_sockets[web_socket_id];
+  agent2.on("message", function (channel, message) {
+    var msg = JSONH.parseJSON(message);
+    webSocketSend(webSocketId, msg)
+  });
+
+  agent2.on("ready", function () {
+      agent2.subscribe("test2");
+  });
+
+  webSocket.on('message', function(message) {
+    // Message received from client
+    handleMessage(webSocketId, message, redisKey, function(newRedisKey) {
+    redisKey = newRedisKey;
+    });
+  });
+
+  webSocket.on('close', function() {
+    delete webSockets[webSocketId];
   });
 
 });
+
+/**
+ * Message received from client
+ * Figure out what type of message and handle appropriately
+ */
+
+function handleMessage(webSocketId, message, redisKey, callback) {
+
+  console.log("Request received: "+message);
+
+  var msg = JSONH.parseJSON(message);
+  switch (msg.messageType) {
+    // Error Case
+    case 0:
+      return webSocketSend(webSocketId, msg);
+    break;
+
+    // Connect Case
+    case 1: // eg. { "messageType": 1, "companyKey": 1, "deviceId": 1 }
+      initializeConnection(msg, webSocketId, function(newRedisKey) {
+        callback(newRedisKey);
+      });
+    break;
+
+    // Incoming Message
+    case 2:
+      // Validate message
+      // Store in MongoDB
+      // Validate redisKey (does exist?)
+      // reformat JSON received into redis message object
+      // Insert into Redis
+      redisClient.publish(redisKey, JSON.stringify(msg)); // Who is listening?
+    break;
+
+    // Add cases here!
+  }
+
+}
+
+
+/**
+ * First message from client 
+ * Setup/retrieve conversation
+ */
+
+function initializeConnection(msg, webSocketId, callback) {
+
+  //Initialize chat connection
+  chat.init(msg.companyKey, msg.deviceId, function(err, conversation) {
+    if(err) {
+      // TODO: Send Error via webSocket to client & return [incorrect company publicKey]
+      console.log(err);
+      return webSocketSend(webSocketId, {messageType: 0, error: err.message})
+    }
+    var initResponse = chat.formatInitResponse(conversation);
+    webSocketSend(webSocketId, initResponse);
+    callback(conversation.redisKey);
+  });
+
+}
+
+/**
+ * Send data over websocket having checked connection
+ */
+
+function webSocketSend(webSocketId, data) {
+
+  // Check that websocket is still open
+    if(webSockets[webSocketId].readyState == WebSocketLib.OPEN) {
+      webSockets[webSocketId].send(JSON.stringify(data));
+    } 
+    // Is this else statement necissary?
+    // else {
+    //   delete webSockets[webSocketId];
+    // }
+
+}
