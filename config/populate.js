@@ -11,13 +11,15 @@ exports.populateDB = function() {
   var Agent = mongoose.model('Agent');
   Agent.findOne({name: "Tom"}, function(err, agent) {
       if(err) { 
-        return callback(err); 
+        return callback(err);
       }
       if(agent == null) { 
-        Agent.create({ "name" : "Tom", "available" : true}, function(err, agent) {
+        Agent.create({ "name" : "Tom", "available" : true, "username": "tomburton", "password": "hellokitty"}, function(err, agent) {
 		    if(err) { 
 		      return callback(err); 
 		    }
+
+		    console.log("Demo Agent Created: "+agent);
 		    
 		    // Create new Company
 			var Company = mongoose.model('Company');
