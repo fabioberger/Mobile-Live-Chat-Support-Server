@@ -25,7 +25,7 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 }); 
 
 // uncomment to pre-populate with test company and agent
-// require('./config/populate').populateDB();
+require('./config/populate').populateDB();
 
 var webSocketServer      = new WebSocketServer({port: 5000, disableHixie: true});
 var webSockets            = {};
