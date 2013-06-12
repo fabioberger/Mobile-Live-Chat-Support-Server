@@ -116,14 +116,57 @@ AgentSchema.statics = {
    *
    * @param {_id} id
    * @param {Function} cb
-   * @api private
    */
 
   load: function (id, cb) {
     this.findOne({ _id : id })
       .populate('currentConversations') //TODO: specify only conversation metadata you want
       .exec(cb);
-  }
+  },
+
+
+  /**
+   * Authenticate Agent by username & password
+   *
+   * @param {username} username
+   * @param {unencrypted_password} unencrypted_password
+   * @param {Function} cb
+   */
+
+  auth: function(username, unencrypted_password, cb) {
+    this.findOne({username: username}, function(err, agent) {
+        if(err) {
+            console.log(err);
+            return cb(new Error("Authentication failure"));
+        }
+        if(agent == null) {
+            console.log("Agent with username not found");
+            return cb(new Error("Authentication failure"));
+        }
+        if(agent.authenticate(unencrypted_password)) {
+            //console.log("Agent has successfully authenticated");
+            return cb(agent._id);
+        }
+    });
+  },
+
+   /**
+   * Change Agents Availablity
+   *
+   * @param {username} username
+   * @param {available} available
+   * @param {Function} cb
+   */
+
+   availability: function(username, status) {
+    this.update({username: username}, { $set: { available: status } }, function(err, numAffected) {
+        if(err) {
+            console.log(err);
+            return err;
+        }
+        return true;
+    });
+  },
 
 }
 

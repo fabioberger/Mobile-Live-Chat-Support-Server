@@ -41,7 +41,7 @@ process.stdin.resume();
 
   process.stdin.on('data', function (text) {
     //console.log('Agent Says:', util.inspect(text));
-    var timestamp = new Date().getTime();
+    var timestamp = parseInt(new Date().getTime());
     var msg = { "messageType": 2, "message": {"content": text, "timestamp": timestamp, "author": "agent"}};
     var msg_stringified = JSON.stringify(msg);
     agent2.publish("test2", msg_stringified);

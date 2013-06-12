@@ -14,7 +14,6 @@ var ConversationSchema = new Schema({
   company: { type: Schema.Types.ObjectId, ref: 'Company' },
   agent: { type: Schema.Types.ObjectId, ref: 'Agent' },
   customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
-  redisKey: String,
   messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }]
 });
 
@@ -53,14 +52,27 @@ ConversationSchema.statics = {
    *
    * @param {_id} id
    * @param {Function} cb
-   * @api private
    */
 
   load: function (customerId, companyId, cb) {
     this.findOne({ customer : customerId, company : companyId })
       .populate('company', { name : 1, _id : 0 })
-      .populate('agent', { name : 1, _id : 0}) //TODO: specify only agent metadata you want
-      .populate('messages', { author : 1, timestamp : 1, content : 1, _id : 0}) //TODO: specify only messages metadata you want
+      .populate('agent', { name : 1, username: 1, _id : 0})
+      .populate('messages', { author : 1, timestamp : 1, content : 1, _id : 0}) 
+      .exec(cb);
+  },
+
+  /**
+   * Load All Conversations for Agent
+   *
+   * @param {_id} agentId
+   * @param {Function} cb
+   */
+
+  loadConversationsByAgent: function (agentId, cb) {
+    var agentId = mongoose.Types.ObjectId(agentId+'');
+    this.find({ agent : agentId })
+      .populate('customer') 
       .exec(cb);
   }
 

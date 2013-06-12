@@ -30,12 +30,6 @@ exports.configure = function(server, config) {
 
             client.on('online', function() {
                 logger.info(format_log(client, "online " + client.jid));
-                var message = new xmpp.Message({ type: 'chat', from: 'customer@localhost/Fabios-MacBook-Pro', to: 'john@localhost/Fabios-MacBook-Pro' }).c('body').t("Hi, I have a question.");
-                //console.log(message);
-                client.send(message);
-                //client.send(ltx.parse(message.stanza));
-                //var pong = new ltx.Element('iq', {from: stz.attrs.to, to: stz.attrs.from, id: stz.attrs.id, type: 'result'});
-                //client.send(pong);
             });
 
             client.on('auth-failure', function(jid) {

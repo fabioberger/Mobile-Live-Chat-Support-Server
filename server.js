@@ -6,11 +6,11 @@
 var WebSocketLib = require('ws');
 var WebSocketServer = WebSocketLib.Server;
 var mongoose = require('mongoose');
-var redis = require('redis');
 var fs = require('fs');
 
 // In-house Modules
 var chat = require('chatConnect');
+var relay = require('./app/libs/chatRelay');
 
 // Helpers
 var JSONH = require('./app/helpers/JSONHelper');
@@ -24,6 +24,11 @@ fs.readdirSync(modelsPath).forEach(function (file) {
   require(modelsPath+'/'+file);
 }); 
 
+/**
+* Start XMPP Server
+*/
+var server = require('./xmpp-server/lib/server.js');
+
 // uncomment to pre-populate with test company and agent
 // require('./config/populate').populateDB();
 
@@ -31,44 +36,28 @@ var webSocketServer      = new WebSocketServer({port: 5000, disableHixie: true})
 var webSockets            = {};
 var webSocketPrimaryKey = -1;
 
-// Create Redis Client
-var redisClient = redis.createClient();
-
 webSocketServer.on('connection', function(webSocket) {
 
   // Add newly created webSocket to webSockets.
   var webSocketId = ++webSocketPrimaryKey;
-  webSockets[webSocketId] = webSocket;
-
-  //var redisClient = redis.createClient();
-  var redisKey = null;
-
-  //connect Redis Agent
-  var agent2 = redis.createClient();
-
-  // Most clients probably don't do much on "subscribe".
-  agent2.on("subscribe", function (channel, count) {
-      // no output
-  });
-
-  agent2.on("message", function (channel, message) {
-    var msg = JSONH.parseJSON(message);
-    webSocketSend(webSocketId, msg)
-  });
-
-  agent2.on("ready", function () {
-      agent2.subscribe("test2");
-  });
+  webSockets[webSocketId] = { 'websocket': webSocket};
 
   webSocket.on('message', function(message) {
     // Message received from client
-    handleMessage(webSocketId, message, redisKey, function(newRedisKey) {
-    redisKey = newRedisKey;
-    });
+    handleMessage(webSocketId, message);
+  });
+
+  // Listen for messages from agents
+  relay.on('agentMessage', function(msg) {
+    // Check to see if msg for correct client
+    if(msg.message.customerId == webSockets[webSocketId]['customerId']) {
+      delete msg.message.customerId;
+      webSocketSend(webSocketId, msg);
+    }
   });
 
   webSocket.on('close', function() {
-    delete webSockets[webSocketId];
+    delete webSockets[webSocketId]['websocket'];
   });
 
 });
@@ -78,7 +67,7 @@ webSocketServer.on('connection', function(webSocket) {
  * Figure out what type of message and handle appropriately
  */
 
-function handleMessage(webSocketId, message, redisKey, callback) {
+function handleMessage(webSocketId, message) {
 
   console.log("Request received: "+message);
 
@@ -91,19 +80,19 @@ function handleMessage(webSocketId, message, redisKey, callback) {
 
     // Connect Case
     case 1: // eg. { "messageType": 1, "companyKey": 1, "deviceId": 1 }
-      initializeConnection(msg, webSocketId, function(newRedisKey) {
-        callback(newRedisKey);
-      });
+      initializeConnection(msg, webSocketId);
     break;
 
     // Incoming Message
     case 2:
       // Validate message
       // Store in MongoDB
-      // Validate redisKey (does exist?)
-      // reformat JSON received into redis message object
-      // Insert into Redis
-      redisClient.publish(redisKey, JSON.stringify(msg)); // Who is listening?
+      // reformat JSON received into larger message object
+      if(webSockets[webSocketId]['agent']) {
+        msg['agent'] = webSockets[webSocketId]['agent'];
+        msg['customerId'] = webSockets[webSocketId]['customerId'];
+        relay.clientMessage(JSON.stringify(msg));
+      }
     break;
 
     // Add cases here!
@@ -117,7 +106,7 @@ function handleMessage(webSocketId, message, redisKey, callback) {
  * Setup/retrieve conversation
  */
 
-function initializeConnection(msg, webSocketId, callback) {
+function initializeConnection(msg, webSocketId) {
 
   //Initialize chat connection
   chat.init(msg.companyKey, msg.deviceId, function(err, conversation) {
@@ -127,8 +116,13 @@ function initializeConnection(msg, webSocketId, callback) {
       return webSocketSend(webSocketId, {messageType: 0, error: err.message})
     }
     var initResponse = chat.formatInitResponse(conversation);
+    // Send initial response back to client
     webSocketSend(webSocketId, initResponse);
-    callback(conversation.redisKey);
+
+    console.log(" conversation: "+conversation);
+    // Record agent
+    webSockets[webSocketId]['customerId'] = conversation.customer;
+    webSockets[webSocketId]['agent'] = conversation.agent.username;
   });
 
 }
@@ -140,12 +134,12 @@ function initializeConnection(msg, webSocketId, callback) {
 function webSocketSend(webSocketId, data) {
 
   // Check that websocket is still open
-    if(webSockets[webSocketId].readyState == WebSocketLib.OPEN) {
-      webSockets[webSocketId].send(JSON.stringify(data));
+    if(webSockets[webSocketId]['websocket'].readyState == WebSocketLib.OPEN) {
+      webSockets[webSocketId]['websocket'].send(JSON.stringify(data));
     } 
-    // Is this else statement necissary?
-    // else {
-    //   delete webSockets[webSocketId];
-    // }
+    else {
+      console.log("Websocket connection is unexpectedly closed");
+      //delete webSockets[webSocketId];
+    }
 
 }
