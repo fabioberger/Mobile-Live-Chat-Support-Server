@@ -27,7 +27,7 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 /**
 * Start XMPP Server
 */
-var server = require('./xmpp-server/lib/server.js');
+var server = require('./xmpp-server/server.js');
 
 // uncomment to pre-populate with test company and agent
 // require('./config/populate').populateDB();
