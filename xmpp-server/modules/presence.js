@@ -32,11 +32,11 @@ exports.configure = function(server, config) {
             if (stanza.is('presence')) {
                 if(stanza.getChild('show') == null) {
                     //console.log("Agent back online");
-                    relay.agentStatus(client.username, true);
+                    relay.agentStatus(client.username, 'online');
                 }
                 else if(stanza.getChild('show').getText() === "away") {
                     //console.log("Agent is away!");
-                    relay.agentStatus(client.username, false);
+                    relay.agentStatus(client.username, 'offline');
                 }
 
                 // Fabio: Original code handling roster subscription changes based on presence. Not our use case.

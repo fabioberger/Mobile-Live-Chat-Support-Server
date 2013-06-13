@@ -58,7 +58,7 @@ Relay.prototype.agentStatus = function(username, status) {
 	var msg = {
 		messageType: 3,
 		agent: username,
-		online: status
+		status: status
 	}
 	this.emit('agentStatus', msg);
 }

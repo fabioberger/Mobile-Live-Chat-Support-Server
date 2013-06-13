@@ -66,7 +66,7 @@ var config = require('../config.js');
                     console.log("Error logging in agent");
                     return cb(result);
                 } else {
-                    relay.agentStatus(client.username, true);
+                    relay.agentStatus(client.username, 'online');
                     client.mongoId = result;
                     return cb();
                 }
@@ -84,17 +84,17 @@ var config = require('../config.js');
         });
 
         relay.on('customerStatus', function(msg) {
-            // console.log(client.roster);
+            // Check to make sure notification for correct agent
             if(msg.agent == client.username) {
                 //console.log("Customer "+customerId+" online: "+status);
                 var stanza = ltx.parse('<presence xmlns:stream="http://etherx.jabber.org/streams" from="'+msg.customerId+'@'+config.domain+'" xmlns="jabber:client"><show>chat</show></presence>');
                 if(msg.online == true) {
                     stanza.c('show').t('chat');
                 } else {
-                    stanza.c('show').t('xa');
+                    stanza.c('show').t('away');
                 }
                 stanza.attrs.to = client.jid.bare().toString();
-                console.log("presence attempt: "+stanza);
+                // Send notification to agent
                 client.send(stanza);
             }
         });
@@ -112,7 +112,7 @@ var config = require('../config.js');
         client.on("close", function() {
             // Mark agent as unavailable
             //console.log("Agent has logged off client");
-            relay.agentStatus(client.username, false);
+            relay.agentStatus(client.username, 'offline');
         });
     });
 
