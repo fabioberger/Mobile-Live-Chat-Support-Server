@@ -49,22 +49,29 @@ webSocketServer.on('connection', function(webSocket) {
 
   // Listen for messages from agents
   relay.on('agentMessage', function(msg) {
-    // Check to see if msg for correct client
-    if(msg.message.customerId == webSockets[webSocketId]['customerId']) {
-      delete msg.message.customerId;
-      webSocketSend(webSocketId, msg);
+    // Make sure websocket hasnt expired
+    if(webSocketId != 0) {
+      // Check to see if msg for correct client
+      if(msg.message.customerId == webSockets[webSocketId]['customerId']) {
+        delete msg.message.customerId;
+        webSocketSend(webSocketId, msg);
+      }
     }
   });
 
   // Listen for status change of connected agent
   relay.on('agentStatus', function(msg) {
-    if(msg.agent == webSockets[webSocketId]['agent']) {
-      webSocketSend(webSocketId, msg);
+    // Make sure websocket hasnt expired
+    if(webSocketId != 0) {
+      // Check to see if msg for correct client
+      if(msg.agent == webSockets[webSocketId]['agent']) {
+        webSocketSend(webSocketId, msg);
+      }
     }
   });
 
   webSocket.on('close', function() {
-    relay.customerStatus(webSockets[webSocketId]['agent'], webSockets[webSocketId]['customerId'], false);
+    relay.customerStatus(webSockets[webSocketId]['agent'], webSockets[webSocketId]['customerId'], 'offline');
     delete webSockets[webSocketId]['websocket'];
   });
 
@@ -129,7 +136,7 @@ function initializeConnection(msg, webSocketId) {
     // Record agent
     webSockets[webSocketId]['customerId'] = conversation.customer;
     webSockets[webSocketId]['agent'] = conversation.agent.username;
-    relay.customerStatus(conversation.agent.username, conversation.customer, true);
+    relay.customerStatus(conversation.agent.username, conversation.customer, 'online');
   });
 
 }

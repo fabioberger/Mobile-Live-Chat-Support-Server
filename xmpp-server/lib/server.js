@@ -85,10 +85,11 @@ var config = require('../config.js');
 
         relay.on('customerStatus', function(msg) {
             // Check to make sure notification for correct agent
+            console.log("Is: "+msg.agent+" same as: "+client.username);
             if(msg.agent == client.username) {
                 //console.log("Customer "+customerId+" online: "+status);
                 var stanza = ltx.parse('<presence xmlns:stream="http://etherx.jabber.org/streams" from="'+msg.customerId+'@'+config.domain+'" xmlns="jabber:client"><show>chat</show></presence>');
-                if(msg.online == true) {
+                if(msg.status == 'online') {
                     stanza.c('show').t('chat');
                 } else {
                     stanza.c('show').t('away');

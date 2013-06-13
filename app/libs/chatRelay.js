@@ -51,6 +51,7 @@ Relay.prototype.agentMessage = function(message) {
 
 /**
  * Agent Status Change
+ * supported status notifications: 'online', 'offline', 'composing', 'paused'
  */
 
 Relay.prototype.agentStatus = function(username, status) {
@@ -65,13 +66,14 @@ Relay.prototype.agentStatus = function(username, status) {
 
 /**
  * Customer Status Change
+ * supported status notifications: 'online', 'offline'
  */
 
 Relay.prototype.customerStatus = function(username, customerId, status) {
 	var msg = {
 		agent: username,
 		customerId: customerId,
-		online: status
+		status: status
 	}
 	this.emit('customerStatus', msg);
 }

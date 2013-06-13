@@ -6,6 +6,9 @@ var mongoose    = require('mongoose');
 // Load Mongoose 
 var Conversation = mongoose.model('Conversation');
 
+// In-House Modules
+var relay = require('../../app/libs/chatRelay');
+
 // http://xmpp.org/rfcs/rfc3921.html#roster
 /* Items have : 
 - key(jid)
@@ -43,16 +46,11 @@ exports.configure = function(server, config) {
 
                         conversations.forEach(function(convo) {
                             // Attach all roster items to query object
-                            // Add group to this & Fudge so it seems like all clients are online (sessions)
                             query.c("item", {approved: true, jid: convo.customer._id+'@'+config.domain, name: convo.customer._id+'', subscription: 'both'});
+                            // Make the customer also re-appear as online
+                            relay.customerStatus(client.username, convo.customer._id, 'online');
                         });
-                        if(client.username != 'bobby') {
-                            query.c("item", {approved: true, jid: 'bobby'+'@'+config.domain, name: 'bobby', subscription: 'both'});
-                        } 
-                        if(client.username != 'tomburton') {
-                            query.c("item", {approved: true, jid: 'tomburton'+'@'+config.domain, name: 'tomburton', subscription: 'both'});
-                        }
-                            //query.c("item", {approved: true, jid: 'ching'+'@'+config.domain, name: 'ching', subscription: 'both'});
+                        //query.c("item", {approved: true, jid: 'ching'+'@'+config.domain, name: 'ching', subscription: 'both'});
                         console.log("Send Roster: "+stanza);
                         stanza.attrs.to = stanza.attrs.from;
                         client.send(stanza);
