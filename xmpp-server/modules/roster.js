@@ -35,7 +35,7 @@ exports.configure = function(server, config) {
             // Check if request is for roster
             if (stanza.is('iq') && (query = stanza.getChild('query', "jabber:iq:roster"))) {
                 //console.log(query);
-                // If they want to get roster, find it in REDIS & return it
+                // If they want to get roster, find it in MongoDB
                 if(stanza.attrs.type === "get") {
                     stanza.attrs.type = "result";
 
@@ -51,7 +51,6 @@ exports.configure = function(server, config) {
                             relay.customerStatus(client.username, convo.customer._id, 'online');
                         });
                         //query.c("item", {approved: true, jid: 'ching'+'@'+config.domain, name: 'ching', subscription: 'both'});
-                        console.log("Send Roster: "+stanza);
                         stanza.attrs.to = stanza.attrs.from;
                         client.send(stanza);
                     });

@@ -18,19 +18,14 @@ var relay = require('../../app/libs/chatRelay');
 // Loading all modules needed
 var Logger      = require('../modules/logger');
 var Router      = require('../modules/router');
-var Offline     = require('../modules/offline');
 var Version     = require('../modules/version'); 
 var Presence    = require('../modules/presence');
 var Roster      = require('../modules/roster');
 var DiscoInfo   = require('../modules/disco_info');
 var VCard       = require('../modules/vcard');
-var Websocket   = require('../modules/websocket');
-var S2S         = require('../modules/s2s');
 var Ping        = require('../modules/ping');
 var Message        = require('../modules/message');
 
-// Loading non -xmpp libraries
-var User = require('../lib/users.js').User;
 
 var config = require('../config.js');
 
@@ -42,16 +37,13 @@ var config = require('../config.js');
     // Configure the mods at the server level!
     Router.configure(server, config.router); 
     Logger.configure(server, config.logger);
-    Offline.configure(server, config.offline);
     Version.configure(server, config.version);
     Presence.configure(server, config.presence);
     Roster.configure(server, config);
     DiscoInfo.configure(server, config.disco);
     VCard.configure(server, config.vcard);
-    Websocket.configure(server, config.websocket);
-    S2S.configure(server, config);
     Ping.configure(server, config.ping);
-    Message.configure(server, config.message)
+    Message.configure(server, config.message);
 
     // On Connect event. When a client connects.
     server.on("connect", function(client) {
@@ -85,7 +77,6 @@ var config = require('../config.js');
 
         relay.on('customerStatus', function(msg) {
             // Check to make sure notification for correct agent
-            console.log("Is: "+msg.agent+" same as: "+client.username);
             if(msg.agent == client.username) {
                 //console.log("Customer "+customerId+" online: "+status);
                 var stanza = ltx.parse('<presence xmlns:stream="http://etherx.jabber.org/streams" from="'+msg.customerId+'@'+config.domain+'" xmlns="jabber:client"><show>chat</show></presence>');

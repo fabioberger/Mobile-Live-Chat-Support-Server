@@ -50,7 +50,7 @@ webSocketServer.on('connection', function(webSocket) {
   // Listen for messages from agents
   relay.on('agentMessage', function(msg) {
     // Make sure websocket hasnt expired
-    if(webSocketId != 0) {
+    if(webSockets[webSocketId]['websocket'] != undefined) {
       // Check to see if msg for correct client
       if(msg.message.customerId == webSockets[webSocketId]['customerId']) {
         delete msg.message.customerId;
@@ -62,7 +62,7 @@ webSocketServer.on('connection', function(webSocket) {
   // Listen for status change of connected agent
   relay.on('agentStatus', function(msg) {
     // Make sure websocket hasnt expired
-    if(webSocketId != 0) {
+    if(webSockets[webSocketId]['websocket'] != undefined) {
       // Check to see if msg for correct client
       if(msg.agent == webSockets[webSocketId]['agent']) {
         webSocketSend(webSocketId, msg);
@@ -72,6 +72,9 @@ webSocketServer.on('connection', function(webSocket) {
 
   webSocket.on('close', function() {
     relay.customerStatus(webSockets[webSocketId]['agent'], webSockets[webSocketId]['customerId'], 'offline');
+    // Remove all listeners before deleting websocket
+    relay.removeAllListeners('agentMessage');
+    relay.removeAllListeners('agentStatus');
     delete webSockets[webSocketId]['websocket'];
   });
 

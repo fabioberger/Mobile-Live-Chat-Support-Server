@@ -41,15 +41,15 @@ Router.prototype.route = function(stanza, from) {
                 // We couldn't actually send to anyone!
                 if (!sent) {
                     delete self.sessions[toJid.bare().toString()];
-                    self.emit("recipientOffline", stanza);
+                    //self.emit("recipientOffline", stanza);
                 }
             }
             else {
-                self.emit("recipientOffline", stanza);
+                //self.emit("recipientOffline", stanza);
             }
         }
         else {
-            self.emit("externalUser", stanza)
+            //self.emit("externalUser", stanza)
         }
     }
     else {

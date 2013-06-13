@@ -14,7 +14,6 @@ exports.configure = function(server, config) {
         client.on('stanza', function(stz) {
             var stanza = ltx.parse(stz.toString());
             if (stanza.is('message') && stanza.attrs.type !== 'error') {
-                console.log("Msg stanza "+stanza);
                 var agent = stanza.attrs.from.split("@");
                 var customer = stanza.attrs.to.split("@");
                 // If message has body, send it to customer
@@ -28,15 +27,15 @@ exports.configure = function(server, config) {
                         timestamp: timestamp
                     }
                     message = JSON.stringify(msg);
-                    console.log('Agent Sends: '+message);
+                    //console.log('Agent Sends: '+message);
                     relay.agentMessage(message);
                 } else if(stanza.getChild('composing') !== undefined) {
                     // notify customer that agent is typing
-                    console.log('Agent is typing');
+                    //console.log('Agent is typing');
                     relay.agentStatus(client.username, 'composing');
                 } else if(stanza.getChild('paused') !== undefined) {
                     // notify customer that agent has paused
-                    console.log('Agent is paused');
+                    //console.log('Agent is paused');
                     relay.agentStatus(client.username, 'paused');
                 }
             }
