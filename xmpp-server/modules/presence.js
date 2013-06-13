@@ -39,7 +39,7 @@ exports.configure = function(server, config) {
                     relay.agentStatus(client.username, false);
                 }
 
-                //Fabio: Original code handling roster subscription changes based on presence. Not our use case.
+                // Fabio: Original code handling roster subscription changes based on presence. Not our use case.
                 // Ok, now we must do things =)
                 // if ((!stanza.attrs.to || stanza.attrs.to === client.server.options.domain) && !stanza.attrs.type) {
                 //     // Section 5.1.1 in http://xmpp.org/rfcs/rfc3921.html#presence
@@ -140,4 +140,3 @@ exports.configure = function(server, config) {
 
     });
 }
-

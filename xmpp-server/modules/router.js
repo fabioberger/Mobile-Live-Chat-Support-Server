@@ -62,6 +62,7 @@ Router.prototype.route = function(stanza, from) {
  * Registers a route (jid => specific client connection)
  */
 Router.prototype.registerRoute = function(jid, client) {
+
     // What if we have a conflict! TOFIX
     if (!this.sessions.hasOwnProperty(jid.bare().toString()))
         this.sessions[jid.bare().toString()] = {}; 
@@ -106,6 +107,12 @@ exports.configure = function(server, config) {
         // When the user is online, let's register the route. there could be other things involed here... like presence! 
         client.on('online', function() {
             router.registerRoute(client.jid, client);
+            // var newcli = client;
+            // newcli.username = "tomburton";
+            // newcli.jid.user = "tomburton";
+            // newcli.mechanism.username = "tomburton";
+            // newcli.mechanisms[0].username = "tomburton";
+            // router.registerRoute(newcli.jid, newcli);
         });
         
         // When the user is offline, we remove him from the router.

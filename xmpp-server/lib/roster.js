@@ -9,7 +9,9 @@ client.on("error", function (err) {
 
 var Roster = function(owner) {
     this.owner = owner;
-    this.items = [];
+    var item1 = new RosterItem(this, 'tomburton@localhost/Fabios-MacBook-Pro', "both", "tomburton");
+    var item2 = new RosterItem(this, 'bobby@localhost/Fabios-MacBook-Pro', "both", "bobby");
+    this.items = [item1, item2];
     return this;
 };
 util.inherits(Roster, EventEmitter);
@@ -37,25 +39,28 @@ Roster.find = function(jid, cb) {
 
 // Get the roster from redis and add them to roster items
 Roster.prototype.refresh = function(cb) {
+    console.log('roster refresh occured');
     var self = this;
-    client.smembers(Roster.key(self.owner), function(err, obj) {
-        var counts = 0;
-        if(!obj || obj.length == 0) {
-            cb(self);
-        }
-        else {
-            self.items = []; // clear the current items.
-            obj.forEach(function(contact) {
-                RosterItem.find(self, contact, function(item) {
-                    counts++;
-                    self.items.push(item);
-                    if(counts == obj.length) {
-                        cb(self);
-                    }
-                });
-            });
-        }
-    });
+
+    cb(self); // Hack
+    // client.smembers(Roster.key(self.owner), function(err, obj) {
+    //     var counts = 0;
+    //     if(!obj || obj.length == 0) {
+    //         cb(self);
+    //     }
+    //     else {
+    //         self.items = []; // clear the current items.
+    //         obj.forEach(function(contact) {
+    //             RosterItem.find(self, contact, function(item) {
+    //                 counts++;
+    //                 self.items.push(item);
+    //                 if(counts == obj.length) {
+    //                     cb(self);
+    //                 }
+    //             });
+    //         });
+    //     }
+    // });
 };
 
 Roster.prototype.eachSubscription = function(types, callback) {

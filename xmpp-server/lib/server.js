@@ -3,6 +3,7 @@
 */
 
 var xmpp        = require('node-xmpp');
+var ltx = require('ltx');
 var mongoose    = require('mongoose');
 
 // Load Mongoose 
@@ -72,13 +73,29 @@ var config = require('../config.js');
             });
         });
 
-        // On recieving msg from client, send to agent via XMPP
-        relay.on('clientMessage', function(message) {
+        // On recieving msg from customer, send to agent via XMPP
+        relay.on('customerMessage', function(message) {
             var msg = JSONH.parseJSON(message);
             // Check that this message is for the right agent
             if(msg.agent == client.username) {
                 var message = new xmpp.Message({ type: 'chat', from: msg.customerId+'@'+config.domain, to: client.jid.bare().toString() }).c('body').t(msg.content);
                 client.send(message);
+            }
+        });
+
+        relay.on('customerStatus', function(msg) {
+            // console.log(client.roster);
+            if(msg.agent == client.username) {
+                //console.log("Customer "+customerId+" online: "+status);
+                var stanza = ltx.parse('<presence xmlns:stream="http://etherx.jabber.org/streams" from="'+msg.customerId+'@'+config.domain+'" xmlns="jabber:client"><show>chat</show></presence>');
+                if(msg.online == true) {
+                    stanza.c('show').t('chat');
+                } else {
+                    stanza.c('show').t('xa');
+                }
+                stanza.attrs.to = client.jid.bare().toString();
+                console.log("presence attempt: "+stanza);
+                client.send(stanza);
             }
         });
 

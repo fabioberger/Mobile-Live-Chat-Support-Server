@@ -4,8 +4,6 @@ module.exports = {
 
     // logging
     logger: true,
-    // Message response
-    message: true,
 
     //tls: {
     //    keyPath: '/etc/xmpp-server/tls/localhost-key.pem',

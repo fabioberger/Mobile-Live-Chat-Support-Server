@@ -46,6 +46,14 @@ exports.configure = function(server, config) {
                             // Add group to this & Fudge so it seems like all clients are online (sessions)
                             query.c("item", {approved: true, jid: convo.customer._id+'@'+config.domain, name: convo.customer._id+'', subscription: 'both'});
                         });
+                        if(client.username != 'bobby') {
+                            query.c("item", {approved: true, jid: 'bobby'+'@'+config.domain, name: 'bobby', subscription: 'both'});
+                        } 
+                        if(client.username != 'tomburton') {
+                            query.c("item", {approved: true, jid: 'tomburton'+'@'+config.domain, name: 'tomburton', subscription: 'both'});
+                        }
+                            //query.c("item", {approved: true, jid: 'ching'+'@'+config.domain, name: 'ching', subscription: 'both'});
+                        console.log("Send Roster: "+stanza);
                         stanza.attrs.to = stanza.attrs.from;
                         client.send(stanza);
                     });
@@ -53,5 +61,4 @@ exports.configure = function(server, config) {
             }
         });
     });
-}
-
+} 

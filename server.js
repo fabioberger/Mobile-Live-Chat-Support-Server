@@ -56,7 +56,15 @@ webSocketServer.on('connection', function(webSocket) {
     }
   });
 
+  // Listen for status change of connected agent
+  relay.on('agentStatus', function(msg) {
+    if(msg.agent == webSockets[webSocketId]['agent']) {
+      webSocketSend(webSocketId, msg);
+    }
+  });
+
   webSocket.on('close', function() {
+    relay.customerStatus(webSockets[webSocketId]['agent'], webSockets[webSocketId]['customerId'], false);
     delete webSockets[webSocketId]['websocket'];
   });
 
@@ -91,7 +99,7 @@ function handleMessage(webSocketId, message) {
       if(webSockets[webSocketId]['agent']) {
         msg['agent'] = webSockets[webSocketId]['agent'];
         msg['customerId'] = webSockets[webSocketId]['customerId'];
-        relay.clientMessage(JSON.stringify(msg));
+        relay.customerMessage(JSON.stringify(msg));
       }
     break;
 
@@ -118,11 +126,10 @@ function initializeConnection(msg, webSocketId) {
     var initResponse = chat.formatInitResponse(conversation);
     // Send initial response back to client
     webSocketSend(webSocketId, initResponse);
-
-    console.log(" conversation: "+conversation);
     // Record agent
     webSockets[webSocketId]['customerId'] = conversation.customer;
     webSockets[webSocketId]['agent'] = conversation.agent.username;
+    relay.customerStatus(conversation.agent.username, conversation.customer, true);
   });
 
 }

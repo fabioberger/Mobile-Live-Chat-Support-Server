@@ -33,8 +33,8 @@ Relay.prototype.__proto__ = EventEmitter.prototype;
  * Receive Client Message and re-broadcast
  */
 
-Relay.prototype.clientMessage = function(message) {
-	this.emit('clientMessage', message);
+Relay.prototype.customerMessage = function(message) {
+	this.emit('customerMessage', message);
 }
 
 /**
@@ -55,7 +55,25 @@ Relay.prototype.agentMessage = function(message) {
 
 Relay.prototype.agentStatus = function(username, status) {
 	Agent.availability(username, status);
-	this.emit('agentStatus', username, status);
+	var msg = {
+		messageType: 3,
+		agent: username,
+		online: status
+	}
+	this.emit('agentStatus', msg);
+}
+
+/**
+ * Customer Status Change
+ */
+
+Relay.prototype.customerStatus = function(username, customerId, status) {
+	var msg = {
+		agent: username,
+		customerId: customerId,
+		online: status
+	}
+	this.emit('customerStatus', msg);
 }
 
 
