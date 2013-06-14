@@ -3,23 +3,21 @@
 */
 var WebSocketLib = require('ws');
 var WebSocketServer = WebSocketLib.Server;
-var mongoose = require('mongoose');
 var fs = require('fs');
-// In-house Modules
+var mongoose = require('mongoose').connect('mongodb://localhost/test');
+
+// Bootstrap mongoose models
+var modelsPath = __dirname + '/app/models';
+fs.readdirSync(modelsPath).forEach(function (file) {
+  require(modelsPath+'/'+file);
+}); 
+
+// Libraries
 var chat = require('./app/libs/chatConnect');
 var relay = require('./app/libs/chatRelay');
 
 // Helpers
 var JSONH = require('./app/helpers/JSONHelper');
-
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost/test');
-
-// Bootstrap models
-var modelsPath = __dirname + '/app/models';
-fs.readdirSync(modelsPath).forEach(function (file) {
-  require(modelsPath+'/'+file);
-}); 
 
 /**
 * Start XMPP Server
@@ -31,8 +29,8 @@ xmppServer.run(xmppConfig, mongoose, JSONH, relay);
 // uncomment to pre-populate with test company and agent
 // require('./config/populate').populateDB();
 
-var webSocketServer      = new WebSocketServer({port: 5000, disableHixie: true});
-var webSockets            = {};
+var webSocketServer = new WebSocketServer({port: 5000, disableHixie: true});
+var webSockets = {};
 var webSocketPrimaryKey = -1;
 
 webSocketServer.on('connection', function(webSocket) {
@@ -92,7 +90,8 @@ function handleMessage(webSocketId, message) {
   switch (msg.messageType) {
     // Error Case
     case 0:
-      return webSocketSend(webSocketId, msg);
+      console.log("Received Error Message: "+msg.error);
+      return webSocketSend(webSocketId, msg); // Send back merely to log for now
     break;
 
     // Connect Case
@@ -109,6 +108,8 @@ function handleMessage(webSocketId, message) {
         msg['agent'] = webSockets[webSocketId]['agent'];
         msg['customerId'] = webSockets[webSocketId]['customerId'];
         relay.customerMessage(JSON.stringify(msg));
+      } else {
+        return webSocketSend(webSocketId, {messageType: 0, error: 'No initialized connection found'})
       }
     break;
 
