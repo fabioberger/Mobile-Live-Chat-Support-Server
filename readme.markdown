@@ -30,7 +30,7 @@ $ node server
 
 ### Native Mobile Cient-Server Protocol
 
-__Initialize Connection__
+1. __Initialize Connection__
 
 Mobile Client Sends:
 
@@ -59,7 +59,7 @@ On Success Server Returns:
 } 
 ```
 
-__Send Message__
+2. __Send Message__
 
 Mobile Client Sends:
 
@@ -79,9 +79,46 @@ On Success Server Returns:
 
 ```javascript
 {
-	messageType: 3,
+	messageType: 4,
 	received: true
 } 
 ```
+
+3. __Agent Status__
+
+Server Sends:
+
+```javascript
+{
+	messageType: 3,
+	agent: AGENT_USERNAME,
+	status: "offline"
+	
+} 
+```
+_Status Options:_ offline, online, composing, paused
+
+On Success Server Returns:
+
+```javascript
+{
+	messageType: 4,
+	received: true
+} 
+```
+
+
+4. __Error Message__
+
+Mobile Client OR Server Sends:
+
+```javascript
+{
+	messageType: 0,
+	originalRequest: 1,
+	error: "Invalid Company Public Key",	
+} 
+```
+_originalRequest:_ the messageType of the request that caused the error
 
 
