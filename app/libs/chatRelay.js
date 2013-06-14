@@ -41,10 +41,14 @@ Relay.prototype.customerMessage = function(message) {
  * Receive Agent Message and re-broadcast
  */
 
-Relay.prototype.agentMessage = function(message) {
-	var msg = JSONH.parseJSON(message);
-	msg['author'] = 'agent';
-    delete msg.agent;
+Relay.prototype.agentMessage = function(customerId, content) {
+	var timestamp = parseInt(new Date().getTime());
+	var msg = {
+		author: 'agent',
+		customerId: customerId,
+		timestamp: timestamp,
+		content: content
+	}
     var response = { messageType: 2, message: msg }
 	this.emit('agentMessage', response);
 }

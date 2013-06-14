@@ -1,21 +1,18 @@
 /**
 * Module Dependencies
 */
-
-// Third Party Modules
 var WebSocketLib = require('ws');
 var WebSocketServer = WebSocketLib.Server;
 var mongoose = require('mongoose');
 var fs = require('fs');
-
 // In-house Modules
-var chat = require('chatConnect');
+var chat = require('./app/libs/chatConnect');
 var relay = require('./app/libs/chatRelay');
 
 // Helpers
 var JSONH = require('./app/helpers/JSONHelper');
 
-// Bootstrap db connection
+// Connect to MongoDB
 mongoose.connect('mongodb://localhost/test');
 
 // Bootstrap models
@@ -27,7 +24,9 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 /**
 * Start XMPP Server
 */
-var server = require('./xmpp-server/server.js');
+var xmppConfig = require('./config/xmppConfig.js');
+var xmppServer = require('./xmpp-server/xmppServer.js');
+xmppServer.run(xmppConfig, mongoose, JSONH, relay);
 
 // uncomment to pre-populate with test company and agent
 // require('./config/populate').populateDB();
