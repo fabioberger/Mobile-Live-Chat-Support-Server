@@ -61,7 +61,7 @@ On Success Server Returns:
 
 #### __Send Message__
 
-Mobile Client Sends:
+Mobile Client Or Server Sends:
 
 ```javascript
 {
@@ -74,8 +74,9 @@ Mobile Client Sends:
 		}
 } 
 ```
+_author:_ the sender (either "customer" or "agent")
 
-On Success Server Returns:
+On Recepit Server/Client Returns:
 
 ```javascript
 {
