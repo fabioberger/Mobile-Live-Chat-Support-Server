@@ -30,7 +30,7 @@ $ node server
 
 ### Native Mobile Cient-Server Protocol
 
-** Initialize Connection **
+__Initialize Connection__
 
 Mobile Client Sends:
 
@@ -58,4 +58,30 @@ On Success Server Returns:
 		]
 } 
 ```
+
+__Send Message__
+
+Mobile Client Sends:
+
+```javascript
+{
+	messageType: 1,
+	message:
+		{ 
+			author: "customer",
+			timestamp: 1370930988914,
+			content: "Hi, do you have this suit in grey?"
+		}
+} 
+```
+
+On Success Server Returns:
+
+```javascript
+{
+	messageType: 3,
+	received: true
+} 
+```
+
 

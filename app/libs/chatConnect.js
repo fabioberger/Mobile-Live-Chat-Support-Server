@@ -147,7 +147,6 @@ function formatInitResponse(conversation) {
 
   var response = {
     messageType: 1,
-    companyName: conversation.company.name,
     agentName: conversation.agent.name,
     messages: conversation.messages
   }
