@@ -2,8 +2,9 @@ var xmpp = require('node-xmpp');
 var logger = require('winston');
 
 // http://xmpp.org/extensions/xep-0160.html
+// Logs common occuring requests
+
 function format_log(client, message) {
-    // was: socket.remoteAddress (didnt work)
     return [client.server.options.port, client.streamId, message].join(" "); 
 }
 
@@ -13,11 +14,9 @@ function Logger() {
 exports.configure = function(server, config) {
     // Config contains the configuration for the logger facility!
     // The logger relies purely on events... 
-    // From there, we can access and listen to events on all objects linked to that server, including the router, the session manager, the S2S router, the connections... etc.
+    // From there, we can access and listen to events on all objects linked to that server, including the router, the session manager, the connections... etc.
     if(config) {
-        //console.log("we are in");
         server.on("connect", function(client) {
-            //console.log(client);
             logger.debug(format_log(client, "connected"));
 
             client.on('session-started', function() {
@@ -44,16 +43,5 @@ exports.configure = function(server, config) {
                 logger.info(format_log(client, "registration-failure " + jid));
             });
         });
-        
-        server.on("s2sReady", function(s2s) {
-            // console.log("S2S ready");
-            // s2s.on("newStream", function(stream) {
-                // console.log("New Stream");
-            // });
-        });
-        
-        server.on("c2sRoutersReady", function(router) {
-            // console.log("Router ready")
-        })
     }
 }

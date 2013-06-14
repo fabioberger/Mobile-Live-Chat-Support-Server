@@ -3,6 +3,7 @@ var ltx = require('ltx');
 
 // XEP-0092: Software Version
 // http://xmpp.org/extensions/xep-0092.html
+// Left this untouched
 
 function Version() {
 }

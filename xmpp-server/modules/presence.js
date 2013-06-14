@@ -1,27 +1,14 @@
 var xmpp = require('node-xmpp');
 var ltx = require('ltx');
 
-// In-House Modules
-var relay = require('../../app/libs/chatRelay');
-
 // http://xmpp.org/extensions/xep-0160.html
-
-// TODO
-// Deal with 5.1.4.  Directed Presence. 
-// PROBLEM : HOW DO WE INTERRUPT A STANZA?
-// IMPLEMENT PRIORITY (IN ROUTER AS WELL!)
-// 
+// Implements basic presence (notifies customer when agent goes online/away)
 
 function Presence() {
     
 }
 
-exports.configure = function(server, config) {
-    // server.router.on("recipientOffline", function(stanza) {
-    //     if(stanza.is("presence")) {
-    //         //console.log("PRESENCE FOR OFFLINE USER!");
-    //     }
-    // });
+exports.configure = function(server, relay) {
 
     server.on("connect", function(client) {
 
@@ -32,11 +19,11 @@ exports.configure = function(server, config) {
             if (stanza.is('presence')) {
                 if(stanza.getChild('show') == null) {
                     //console.log("Agent back online");
-                    relay.agentStatus(client.username, 'online');
+                    relay.agentStatus(client.jid.user, 'online');
                 }
                 else if(stanza.getChild('show').getText() === "away") {
-                    //console.log("Agent is away!");
-                    relay.agentStatus(client.username, 'offline');
+                    //console.log("Agent went away");
+                    relay.agentStatus(client.jid.user, 'offline');
                 }
             }
         });

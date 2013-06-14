@@ -1,42 +1,34 @@
 var xmpp = require('node-xmpp');
 var ltx = require('ltx');
 
-// In-House Modules
-var relay = require('../../app/libs/chatRelay');
-
 // Message handling
 
 function Message() {
 }
 
-exports.configure = function(server, config) {
+exports.configure = function(server, relay) {
     server.on('connect', function(client) {
         client.on('stanza', function(stz) {
+
+            // Parse stanza and check that it is of type message
             var stanza = ltx.parse(stz.toString());
             if (stanza.is('message') && stanza.attrs.type !== 'error') {
-                var agent = stanza.attrs.from.split("@");
-                var customer = stanza.attrs.to.split("@");
-                // If message has body, send it to customer
+
+                var agentUsername = stanza.attrs.from.split("@")[0]; //isolate username
+                var customerId = stanza.attrs.to.split("@")[0]; // isolate customerId
+
+                // If message has body, send it to the customer
                 if(stanza.getChild('body') !== undefined) {
-                    var content = stanza.getChild('body').getText();
-                    var timestamp = parseInt(new Date().getTime());
-                    msg = {
-                        agent: agent[0],
-                        customerId: customer[0],
-                        content: content,
-                        timestamp: timestamp
-                    }
-                    message = JSON.stringify(msg);
-                    //console.log('Agent Sends: '+message);
-                    relay.agentMessage(message);
+                    var content = stanza.getChildText('body');
+                    relay.agentMessage(customerId, content);
                 } else if(stanza.getChild('composing') !== undefined) {
-                    // notify customer that agent is typing
+                    // Notify customer that agent is typing
                     //console.log('Agent is typing');
-                    relay.agentStatus(client.username, 'composing');
+                    relay.agentStatus(agentUsername, 'composing');
                 } else if(stanza.getChild('paused') !== undefined) {
-                    // notify customer that agent has paused
+                    // Notify customer that agent has paused
                     //console.log('Agent is paused');
-                    relay.agentStatus(client.username, 'paused');
+                    relay.agentStatus(agentUsername, 'paused');
                 }
             }
         });
