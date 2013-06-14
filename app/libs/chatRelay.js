@@ -33,8 +33,8 @@ Relay.prototype.__proto__ = EventEmitter.prototype;
  * Receive Client Message and re-broadcast
  */
 
-Relay.prototype.customerMessage = function(message) {
-	this.emit('customerMessage', message);
+Relay.prototype.customerMessage = function(msg) {
+	this.emit('customerMessage', msg);
 }
 
 /**

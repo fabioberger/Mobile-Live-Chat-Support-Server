@@ -30,7 +30,7 @@ $ node server
 
 ### Native Mobile Cient-Server Protocol
 
-1. __Initialize Connection__
+	1. __Initialize Connection__
 
 Mobile Client Sends:
 
@@ -59,7 +59,7 @@ On Success Server Returns:
 } 
 ```
 
-2. __Send Message__
+	2. __Send Message__
 
 Mobile Client Sends:
 
@@ -86,7 +86,7 @@ On Success Server Returns:
 _Request:_ the messageType of the request that was successfully received
 
 
-3. __Agent Status__
+	3. __Agent Status__
 
 Server Sends:
 
@@ -105,12 +105,12 @@ On Success Server Returns:
 ```javascript
 {
 	messageType: 0,
-	received: true
+	request: 3,
 } 
 ```
 
 
-0. __Error Message__
+	4. __Error Message__
 
 Mobile Client OR Server Sends:
 

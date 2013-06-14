@@ -107,7 +107,7 @@ function handleMessage(webSocketId, message) {
       if(webSockets[webSocketId]['agent']) {
         msg['agent'] = webSockets[webSocketId]['agent'];
         msg['customerId'] = webSockets[webSocketId]['customerId'];
-        relay.customerMessage(JSON.stringify(msg));
+        relay.customerMessage(msg);
       } else {
         return webSocketSend(webSocketId, {messageType: 0, error: 'No initialized connection found'})
       }

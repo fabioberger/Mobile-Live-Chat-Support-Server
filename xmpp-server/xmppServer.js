@@ -52,11 +52,11 @@ exports.run = function(config, mongoose, JSONH, relay) {
         });
 
         // Listen for messages from customer and send to agent
-        relay.on('customerMessage', function(message) {
-            var msg = JSONH.parseJSON(message);
+        relay.on('customerMessage', function(msg) {
+            var message = msg.message;
             // Check that this message is for the right agent
             if(msg.agent == client.jid.user) {
-                var message = new xmpp.Message({ type: 'chat', from: msg.customerId+'@'+config.domain, to: client.jid.bare().toString() }).c('body').t(msg.content);
+                var message = new xmpp.Message({ type: 'chat', from: msg.customerId+'@'+config.domain, to: client.jid.bare().toString() }).c('body').t(message.content);
                 client.send(message);
             }
         });
