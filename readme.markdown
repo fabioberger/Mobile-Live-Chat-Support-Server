@@ -20,13 +20,7 @@ $ cd chatServer
 $ npm install
 ```
 
-5. Install XMPP Server dependencies:
-```bash
-$ cd xmpp-server
-$ npm install
-```
-
-6. Start the server
+5. Start the server
 ```bash
 $ cd chatServer
 $ node server
@@ -36,13 +30,32 @@ $ node server
 
 ### Native Mobile Cient-Server Protocol
 
-*emphasis Initialize Connection *
+** Initialize Connection **
 
-Client Sends:
+Mobile Client Sends:
 
+```javascript
 {
 	messageType: 1,
-	companyKey: INSERTPUBLICKEY,
-	deviceId: HASHEDMACADDRESS
+	companyKey: INSERT_PUBLIC_KEY,
+	deviceId: HASHED_MAC_ADDRESS
 } 
+```
+
+On Success Server Returns:
+
+```javascript
+{
+	messageType: 1,
+	agentName: AGENT_USERNAME,
+	messages:
+		[
+			{ 
+				author: "agent",
+				timestamp: 1370930988914,
+				content: "Hi, how may I help you?"
+			}
+		]
+} 
+```
 
