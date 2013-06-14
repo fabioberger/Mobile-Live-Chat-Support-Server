@@ -15,7 +15,7 @@ $ mongod
 $ cd chatServer
 ```
 
-4. Install Chat Server dependencies:
+0. Install Chat Server dependencies:
 ```bash
 $ npm install
 ```
@@ -52,7 +52,7 @@ On Success Server Returns:
 		[
 			{ 
 				author: "agent",
-				timestamp: 1370930988914,
+				timestamp: 1370930988910,
 				content: "Hi, how may I help you?"
 			}
 		]
@@ -65,7 +65,7 @@ Mobile Client Sends:
 
 ```javascript
 {
-	messageType: 1,
+	messageType: 2,
 	message:
 		{ 
 			author: "customer",
@@ -79,10 +79,12 @@ On Success Server Returns:
 
 ```javascript
 {
-	messageType: 4,
-	received: true
+	messageType: 0,
+	request: 2,
 } 
 ```
+_Request:_ the messageType of the request that was successfully received
+
 
 3. __Agent Status__
 
@@ -102,23 +104,23 @@ On Success Server Returns:
 
 ```javascript
 {
-	messageType: 4,
+	messageType: 0,
 	received: true
 } 
 ```
 
 
-4. __Error Message__
+0. __Error Message__
 
 Mobile Client OR Server Sends:
 
 ```javascript
 {
-	messageType: 0,
-	originalRequest: 1,
+	messageType: 4,
+	request: 1,
 	error: "Invalid Company Public Key",	
 } 
 ```
-_originalRequest:_ the messageType of the request that caused the error
+_Request:_ the messageType of the request that caused the error
 
 
