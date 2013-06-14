@@ -4,11 +4,9 @@
   "description": "Chat Server using Node.js Mongodb and Redis",
   "dependencies": {
     "ws": "0.4.x",
-    "redis": "0.7.x",
     "mongoose": "3.6.x",
     "async": "0.2.x",
     "underscore": "1.4.x",
-    "node-xmpp": "0.4.x",
     "crypto": "0.0.3"
   },
   "engines": {
@@ -20,7 +18,6 @@
     "start": "server.js"
   },
   "bundleDependencies": [
-    "redis"
   ],
   "main": "server.js",
   "devDependencies": {},
