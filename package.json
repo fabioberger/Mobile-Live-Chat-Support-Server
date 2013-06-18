@@ -7,7 +7,8 @@
     "mongoose": "3.6.x",
     "async": "0.2.x",
     "underscore": "1.4.x",
-    "crypto": "0.0.3"
+    "crypto": "0.0.3",
+    "jsonschema": "0.3.2"
   },
   "engines": {
     "node": "0.8.x",

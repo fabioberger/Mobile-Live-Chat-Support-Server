@@ -14,7 +14,9 @@ var ConversationSchema = new Schema({
   company: { type: Schema.Types.ObjectId, ref: 'Company' },
   agent: { type: Schema.Types.ObjectId, ref: 'Agent' },
   customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
-  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }]
+  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
+  timestamp: String,
+  archived: Boolean
 });
 
 /**
@@ -41,7 +43,17 @@ var ConversationSchema = new Schema({
 
 ConversationSchema.methods = {
 
-  // No METHODS YET
+  /**
+   * Add message to conversation
+   *
+   * @param {Object} message
+   */
+
+   // addMessage: function(message) {
+
+   //  this.update({})
+
+   // }
 
 }
 
@@ -55,9 +67,9 @@ ConversationSchema.statics = {
    */
 
   load: function (customerId, companyId, cb) {
-    this.findOne({ customer : customerId, company : companyId })
+    this.findOne({ customer : customerId, company : companyId, archived: false })
       .populate('company', { name : 1, _id : 0 })
-      .populate('agent', { name : 1, username: 1, _id : 0})
+      .populate('agent', { name : 1, username: 1, _id : 1})
       .populate('messages', { author : 1, timestamp : 1, content : 1, _id : 0}) 
       .exec(cb);
   },
@@ -71,7 +83,7 @@ ConversationSchema.statics = {
 
   loadConversationsByAgent: function (agentId, cb) {
     var agentId = mongoose.Types.ObjectId(agentId+'');
-    this.find({ agent : agentId })
+    this.find({ agent : agentId, archived: false })
       .populate('customer') 
       .exec(cb);
   }

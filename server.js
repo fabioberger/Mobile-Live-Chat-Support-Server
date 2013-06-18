@@ -23,7 +23,7 @@ var JSONH = require('./app/helpers/JSONHelper');
 * Start XMPP Server
 */
 var xmppConfig = require('./config/xmppConfig.js');
-var xmppServer = require('./xmpp-server/xmppServer.js');
+var xmppServer = require('./xmpp_server/xmppServer.js');
 xmppServer.run(xmppConfig, mongoose, JSONH, relay);
 
 // uncomment to pre-populate with test company and agent
@@ -61,14 +61,14 @@ webSocketServer.on('connection', function(webSocket) {
     // Make sure websocket hasnt expired
     if(webSockets[webSocketId]['websocket'] != undefined) {
       // Check to see if msg for correct client
-      if(msg.agent == webSockets[webSocketId]['agent']) {
+      if(msg.agent == webSockets[webSocketId]['agentUsername']) {
         webSocketSend(webSocketId, msg);
       }
     }
   });
 
   webSocket.on('close', function() {
-    relay.customerStatus(webSockets[webSocketId]['agent'], webSockets[webSocketId]['customerId'], 'offline');
+    relay.customerStatus(webSockets[webSocketId]['agentUsername'], webSockets[webSocketId]['customerId'], 'offline');
     // Remove all listeners before deleting websocket
     relay.removeAllListeners('agentMessage');
     relay.removeAllListeners('agentStatus');
@@ -84,14 +84,21 @@ webSocketServer.on('connection', function(webSocket) {
 
 function handleMessage(webSocketId, message) {
 
-  console.log("Request received: "+message);
-
   var msg = JSONH.parseJSON(message);
+
+  // Before anything, lets validate the message
+  var validation = JSONH.validateJSON(msg.messageType, msg);
+  if(validation instanceof Error ) {
+    return webSocketSend(webSocketId, {messageType: 4, request: msg.messageType, error: validation.message});
+  }
+
+  console.log("Request received & valid: "+message);
+
   switch (msg.messageType) {
-    // Error Case
+
+    // Confirm receipt Case
     case 0:
-      console.log("Received Error Message: "+msg.error);
-      return webSocketSend(webSocketId, msg); // Send back merely to log for now
+      console.log("Client confirmed receipt of messageType: "+msg.request);
     break;
 
     // Connect Case
@@ -101,19 +108,25 @@ function handleMessage(webSocketId, message) {
 
     // Incoming Message
     case 2:
-      // Validate message
       // Store in MongoDB
       // reformat JSON received into larger message object
-      if(webSockets[webSocketId]['agent']) {
-        msg['agent'] = webSockets[webSocketId]['agent'];
+      if(webSockets[webSocketId]['agentUsername']) {
+        msg['agentUsername'] = webSockets[webSocketId]['agentUsername'];
+        msg['agentId'] = webSockets[webSocketId]['agentId'];
         msg['customerId'] = webSockets[webSocketId]['customerId'];
         relay.customerMessage(msg);
+        webSocketSend(webSocketId, {messageType: 0, request: 2});
       } else {
-        return webSocketSend(webSocketId, {messageType: 0, error: 'No initialized connection found'})
+        webSocketSend(webSocketId, {messageType: 4, request: 2, error: 'No initialized connection found'});
       }
     break;
 
-    // Add cases here!
+    // Client Errors
+    case 4:
+      console.log("Received Error Message: "+msg.error);
+      webSocketSend(webSocketId, {messageType: 0, request: 4});
+    break
+
   }
 
 }
@@ -131,14 +144,15 @@ function initializeConnection(msg, webSocketId) {
     if(err) {
       // TODO: Send Error via webSocket to client & return [incorrect company publicKey]
       console.log(err);
-      return webSocketSend(webSocketId, {messageType: 0, error: err.message})
+      return webSocketSend(webSocketId, {messageType: 4, request: 1, error: err.message});
     }
     var initResponse = chat.formatInitResponse(conversation);
     // Send initial response back to client
     webSocketSend(webSocketId, initResponse);
     // Record agent
     webSockets[webSocketId]['customerId'] = conversation.customer;
-    webSockets[webSocketId]['agent'] = conversation.agent.username;
+    webSockets[webSocketId]['agentUsername'] = conversation.agent.username;
+    webSockets[webSocketId]['agentId'] = conversation.agent._id;
     relay.customerStatus(conversation.agent.username, conversation.customer, 'online');
   });
 

@@ -4,16 +4,11 @@
 
 var EventEmitter = require("events").EventEmitter;
 var mongoose    = require('mongoose');
-var fs = require('fs');
 
-// Bootstrap models
-var modelsPath = __dirname + '/../models';
-fs.readdirSync(modelsPath).forEach(function (file) {
-  require(modelsPath+'/'+file);
-}); 
-
-// Load Mongoose 
+// Load Mongoose Schemas
 var Agent = mongoose.model('Agent');
+var Conversation = mongoose.model('Conversation');
+var Message = mongoose.model('Message');
 
 // Helpers
 var JSONH = require('../helpers/JSONHelper');
@@ -34,14 +29,61 @@ Relay.prototype.__proto__ = EventEmitter.prototype;
  */
 
 Relay.prototype.customerMessage = function(msg) {
+    saveMessage(msg.customerId, msg.agentId, msg.message);
 	this.emit('customerMessage', msg);
+}
+
+/**
+ * Save Messages to DB & add to correct conversation
+ */
+
+function saveMessage(customerId, agentId, message) {
+
+	var customerId = mongoose.Types.ObjectId(customerId+'');
+    var agentId = mongoose.Types.ObjectId(agentId+'');
+
+	Message.create(message, function(err, message) {
+	    if(err) {
+	    	return console.log(err);
+	    }
+		Conversation.update({ customer : customerId, agent: agentId, archived: false }, {$push: { messages: message}}, function(err, conversation) {
+	    	if(err) {
+	    		return console.log(err);
+	    	}
+	    }); 
+	});
+
+	return true;
+
+}
+
+/**
+ * Archive a given conversation when agent ends it
+ */
+
+function archiveConversation(customerId, agentId) {
+
+	var customerId = mongoose.Types.ObjectId(customerId+'');
+    var agentId = mongoose.Types.ObjectId(agentId+'');
+
+	Conversation.update({ customer : customerId, agent: agentId }, {$set: { archived: true}}, function(err, conversation) {
+    	if(err) {
+    		return console.log(err);
+    	}
+    }); 
+
+	return true;
+
 }
 
 /**
  * Receive Agent Message and re-broadcast
  */
 
-Relay.prototype.agentMessage = function(customerId, content) {
+Relay.prototype.agentMessage = function(customerId, agentId, content) {
+	if(content == '$end') {
+		return archiveConversation(customerId, agentId);
+	}
 	var timestamp = parseInt(new Date().getTime());
 	var msg = {
 		author: 'agent',
@@ -49,6 +91,7 @@ Relay.prototype.agentMessage = function(customerId, content) {
 		timestamp: timestamp,
 		content: content
 	}
+	saveMessage(customerId, agentId, msg);
     var response = { messageType: 2, message: msg }
 	this.emit('agentMessage', response);
 }

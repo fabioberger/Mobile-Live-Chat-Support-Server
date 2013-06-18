@@ -6,8 +6,8 @@ module.exports = {
     logger: true,
 
     //tls: {
-    //    keyPath: '/etc/xmpp-server/tls/localhost-key.pem',
-    //    certPath: '/etc/xmpp-server/tls/localhost-cert.pem'
+    //    keyPath: '/etc/xmpp_server/tls/localhost-key.pem',
+    //    certPath: '/etc/xmpp_server/tls/localhost-cert.pem'
     //},
     
     // Listen on websockets

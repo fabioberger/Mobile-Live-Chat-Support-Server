@@ -127,7 +127,8 @@ function createConversationWithWelcome(companyId, agent, customerId, callback) {
 function createConversation(companyId, agent, customerId, message, callback) {
 
   var Conversation = mongoose.model('Conversation');
-  Conversation.create({company : companyId, agent : agent._id, customer : customerId, messages : [message] }
+  var timestamp = parseInt(new Date().getTime());
+  Conversation.create({company : companyId, agent : agent._id, customer : customerId, messages : [message], timestamp: timestamp, archived: false }
   ,function(err, conversation) {
     if(err) { 
       return callback(err); 
