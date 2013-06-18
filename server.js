@@ -4,9 +4,9 @@
 var WebSocketLib = require('ws');
 var WebSocketServer = WebSocketLib.Server;
 var fs = require('fs');
-var dbName = (process.argv[2] != undefined) ? process.argv[2] : 'test';
+var dbName = (process.argv[3] != undefined) ? process.argv[3] : 'test';
 var mongoose = require('mongoose').connect('mongodb://localhost/'+dbName);
-console.log("Connected to "+dbName+" Database");
+//console.log("Connected to "+dbName+" Database");
 
 // Bootstrap mongoose models
 var modelsPath = __dirname + '/app/models';
@@ -181,6 +181,6 @@ function webSocketSend(webSocketId, data) {
 }
 
 // Run Server Tests
-if(dbName == 'test') {
+if(dbName == 'auto-test') {
   require('./tests/mobile_protocol').runTests(webSocketServer);
 }
