@@ -4,7 +4,7 @@
 var WebSocketLib = require('ws');
 var WebSocketServer = WebSocketLib.Server;
 var fs = require('fs');
-var dbName = (process.argv[2] != undefined) ? process.argv[2] : 'live';
+var dbName = (process.argv[2] != undefined) ? process.argv[2] : 'test';
 var mongoose = require('mongoose').connect('mongodb://localhost/'+dbName);
 console.log("Connected to "+dbName+" Database");
 
