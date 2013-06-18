@@ -64,7 +64,7 @@ exports.run = function(config, mongoose, JSONH, relay) {
         // Listen for customer status updates and send to agent
         relay.on('customerStatus', function(msg) {
             // Check to make sure notification for correct agent
-            if(msg.agent == client.jid.user) {
+            if(msg.agent == client.username) {
                 //console.log("Customer "+customerId+" online: "+status);
                 var stanza = ltx.parse('<presence xmlns:stream="http://etherx.jabber.org/streams" from="'+msg.customerId+'@'+config.domain+'" xmlns="jabber:client"><show>chat</show></presence>');
                 if(msg.status == 'online') {
