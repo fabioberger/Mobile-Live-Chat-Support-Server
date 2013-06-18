@@ -19,7 +19,7 @@ exports.populateDB = function() {
 		      return callback(err); 
 		    }
 
-		    console.log("Demo Agent Created: "+agent);
+		    console.log("Demo Agent Created: "+agent.name);
 		    
 		    // Create new Company
 			var Company = mongoose.model('Company');
@@ -27,7 +27,7 @@ exports.populateDB = function() {
 			  if(err) { 
 			    return callback(err); 
 			  }
-			  console.log("Demo Company Created"+company);
+			  console.log("Demo Company Created"+company.name);
 
 			});
 

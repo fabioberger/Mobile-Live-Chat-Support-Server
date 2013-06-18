@@ -4,7 +4,9 @@
 var WebSocketLib = require('ws');
 var WebSocketServer = WebSocketLib.Server;
 var fs = require('fs');
-var mongoose = require('mongoose').connect('mongodb://localhost/test');
+var dbName = (process.argv[2] != undefined) ? process.argv[2] : 'live';
+var mongoose = require('mongoose').connect('mongodb://localhost/'+dbName);
+console.log("Connected to "+dbName+" Database");
 
 // Bootstrap mongoose models
 var modelsPath = __dirname + '/app/models';
@@ -25,6 +27,9 @@ var JSONH = require('./app/helpers/JSONHelper');
 var xmppConfig = require('./config/xmppConfig.js');
 var xmppServer = require('./xmpp_server/xmppServer.js');
 xmppServer.run(xmppConfig, mongoose, JSONH, relay);
+
+// Uncomment to remove all entries in DB to start tests with clean slate
+// require('./config/depopulate').depopulateDB();
 
 // uncomment to pre-populate with test company and agent
 // require('./config/populate').populateDB();
@@ -89,7 +94,7 @@ function handleMessage(webSocketId, message) {
   // Before anything, lets validate the message
   var validation = JSONH.validateJSON(msg.messageType, msg);
   if(validation instanceof Error ) {
-    return webSocketSend(webSocketId, {messageType: 4, request: msg.messageType, error: validation.message});
+    return webSocketSend(webSocketId, {messageType: 99, request: msg.messageType, error: validation.message});
   }
 
   console.log("Request received & valid: "+message);
@@ -115,16 +120,16 @@ function handleMessage(webSocketId, message) {
         msg['agentId'] = webSockets[webSocketId]['agentId'];
         msg['customerId'] = webSockets[webSocketId]['customerId'];
         relay.customerMessage(msg);
-        webSocketSend(webSocketId, {messageType: 0, request: 2});
+        webSocketSend(webSocketId, {messageType: 4, request: 2});
       } else {
-        webSocketSend(webSocketId, {messageType: 4, request: 2, error: 'No initialized connection found'});
+        webSocketSend(webSocketId, {messageType: 99, request: 2, error: 'No initialized connection found'});
       }
     break;
 
     // Client Errors
     case 4:
       console.log("Received Error Message: "+msg.error);
-      webSocketSend(webSocketId, {messageType: 0, request: 4});
+      webSocketSend(webSocketId, {messageType: 4, request: 4});
     break
 
   }
@@ -173,4 +178,9 @@ function webSocketSend(webSocketId, data) {
       //delete webSockets[webSocketId];
     }
 
+}
+
+// Run Server Tests
+if(dbName == 'test') {
+  require('./tests/mobile_protocol').runTests(webSocketServer);
 }

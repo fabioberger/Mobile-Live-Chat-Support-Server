@@ -84,7 +84,7 @@ Relay.prototype.agentMessage = function(customerId, agentId, content) {
 	if(content == '$end') {
 		return archiveConversation(customerId, agentId);
 	}
-	var timestamp = parseInt(new Date().getTime());
+	var timestamp = parseInt(new Date().getTime()/1000);
 	var msg = {
 		author: 'agent',
 		customerId: customerId,

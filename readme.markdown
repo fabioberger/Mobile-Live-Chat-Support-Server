@@ -80,7 +80,7 @@ On Recepit, Server/Client Returns:
 
 ```javascript
 {
-	messageType: 0,
+	messageType: 4,
 	request: 2,
 } 
 ```
@@ -105,7 +105,7 @@ On Success Client Returns:
 
 ```javascript
 {
-	messageType: 0,
+	messageType: 4,
 	request: 3,
 } 
 ```
@@ -117,7 +117,7 @@ Mobile Client OR Server Sends:
 
 ```javascript
 {
-	messageType: 4,
+	messageType: 99,
 	request: 1,
 	error: "Invalid Company Public Key",	
 } 

@@ -109,7 +109,7 @@ function createConversationWithWelcome(companyId, agent, customerId, callback) {
 
   //Create welcome message
   var Message = mongoose.model('Message');
-  var timestamp = parseInt(new Date().getTime());
+  var timestamp = parseInt(new Date().getTime()/1000);
   Message.create({author: "agent", timestamp : timestamp, content: "Hi, how may I help you?"}, function(err, message) {
     if(err) { 
       return callback(err); 
@@ -127,7 +127,7 @@ function createConversationWithWelcome(companyId, agent, customerId, callback) {
 function createConversation(companyId, agent, customerId, message, callback) {
 
   var Conversation = mongoose.model('Conversation');
-  var timestamp = parseInt(new Date().getTime());
+  var timestamp = parseInt(new Date().getTime()/1000);
   Conversation.create({company : companyId, agent : agent._id, customer : customerId, messages : [message], timestamp: timestamp, archived: false }
   ,function(err, conversation) {
     if(err) { 
