@@ -1,5 +1,5 @@
 ## Live Chat Server
-Server backend for native app live chat support written in Node.js. Includes XMPP server to respond to chat inquiries from XMPP clients. An working iOS Chat library with UI can be found here: https://github.com/soroushjp/Live-Chat-iOS-SDK
+Server backend for native app live chat support written in Node.js. Includes XMPP server to respond to chat inquiries from XMPP clients. A working iOS Chat library with UI can be found here: https://github.com/soroushjp/Live-Chat-iOS-SDK
 
 ### How to use:
 
