@@ -1,5 +1,5 @@
-## LiveMobile Server
-Server backend for native app live chat support
+## Live Chat Server
+Server backend for native app live chat support written in Node.js. Includes XMPP server to respond to chat inquiries from XMPP clients.
 
 ### How to use:
 
