@@ -181,6 +181,6 @@ function webSocketSend(webSocketId, data) {
 }
 
 // Run Server Tests
-if(dbName == 'auto-test') {
-  require('./tests/mobile_protocol').runTests(webSocketServer);
-}
+// if(dbName == 'auto-test') {
+//   require('./tests/mobile_protocol').runTests(webSocketServer);
+// }
